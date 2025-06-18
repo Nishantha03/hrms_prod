@@ -1,0 +1,10 @@
+django-cors-headers
+Pillow
+djangorestframework
+djangorestframework-simplejwt
+mysqlclient
+django_rest_passwordreset
+requests
+twilio
+pandas
+openpyxl
