@@ -77,7 +77,8 @@ MIDDLEWARE = [
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
-    
+    "http://65.108.80.127:3000",
+    "http://65.108.80.127:8000"
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -135,22 +136,35 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'backend.wsgi.application'
-FRONTEND_URL = "http://localhost:5173"
+# FRONTEND_URL = "http://localhost:5173"
+
+FRONTEND_URL = "http://65.108.80.127:8000"
+
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'hrms_data',
+#         'USER': 'root',
+#         'PASSWORD':'mysql',
+#         'HOST': 'localhost',
+#         'PORT': '3306',
+#     }
+# }
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'hrms_data',
-        'USER': 'root',
-        'PASSWORD':'mysql',
-        'HOST': 'localhost',
-        'PORT': '3307',
+        'NAME': 'hrmsbackend',
+        'USER': 'hrmsbackend',
+        'PASSWORD':'ZLX7zmxAhszNZkxy',
+        'HOST': '65.108.80.127',
+        'PORT': '3306',
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
@@ -188,7 +202,7 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587  
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'bsanthiya0616@gmail.com'
-EMAIL_HOST_PASSWORD = 'urfy dszj bkak wjsn'
+EMAIL_HOST_PASSWORD = 'ewcx ksnc oivq mbed'
 
 
 
