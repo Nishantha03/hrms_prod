@@ -471,5 +471,9 @@ class UploadEmployeeExcelView(APIView):
             return Response({"message": "Employees and login details uploaded successfully"}, status=status.HTTP_201_CREATED)
 
         except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            import traceback
+            return Response({
+                "error": str(e),
+                "trace": traceback.format_exc()
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
