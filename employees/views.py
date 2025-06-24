@@ -317,7 +317,7 @@ def team_member_counts(request):
 def build_org_chart(employee):
     return {
         "id": employee.employee_user_id,
-        "name": employee.employee_first_name,
+        "name": f"{employee.Salutation} {employee.employee_first_name} {employee.employee_last_name}",
         "label":employee.designation,
         "department": employee.departmant,
         "profileimg": employee.employee_photo.url if employee.employee_photo else "/media/default-profile.png",
