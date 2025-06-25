@@ -32,7 +32,8 @@ def get_username(request, pk=None):
     userdetails = Employee.objects.get(user=request.user)
     user_department = userdetails.departmant
     username = user.username
-    return Response({'username': username, 'department': user_department})
+    name = f"{userdetails.Salutation} {userdetails.employee_first_name} {userdetails.employee_last_name}
+    return Response({'username': username, 'department': user_department, 'name': name})
 
 
 @api_view(['POST'])
