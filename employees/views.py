@@ -22,24 +22,23 @@ import pandas as pd
 
 import math
 
-def is_valid(val):
-    return val is not None and val != '' and not pd.isna(val) and str(val).strip().lower() != 'not available'
-
 def get_employee_display_name(employee):
-    name_parts = []
+    def safe_strip(val):
+        return val.strip() if isinstance(val, str) else ''
+    
+    salutation = safe_strip(getattr(employee, 'Salutation', ''))
+    first_name = safe_strip(getattr(employee, 'employee_first_name', ''))
+    last_name = safe_strip(getattr(employee, 'employee_last_name', ''))
 
-    salutation = getattr(employee, 'Salutation', '').strip()
-    first_name = getattr(employee, 'employee_first_name', '').strip()
-    last_name = getattr(employee, 'employee_last_name', '').strip()
+    name_parts = [salutation, first_name, last_name]
+    name = ' '.join(part for part in name_parts if part)
 
-    if is_valid(salutation):
-        name_parts.append(salutation.strip())
-    if is_valid(first_name):
-        name_parts.append(first_name.strip())
-    if is_valid(last_name):
-        name_parts.append(last_name.strip())
+    # Fallback: return just first_name or last_name if both others are missing
+    if not name:
+        name = first_name or last_name or ''
 
-    return ' '.join(name_parts).strip()
+    return name.strip()
+
 
 class EventView(APIView):
     """
@@ -343,7 +342,7 @@ def build_org_chart(employee):
     employee_name = f"{employee.Salutation} {employee.employee_first_name} {employee.employee_last_name}"
     return {
         "id": employee.employee_user_id,
-        "name": get_employee_display_name(employee_name),
+        "name": get_employee_display_name(employee),
         "label":employee.designation,
         "department": employee.departmant,
         "profileimg": employee.employee_photo.url if employee.employee_photo else "/media/default-profile.png",
