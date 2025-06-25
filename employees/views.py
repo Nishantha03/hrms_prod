@@ -29,10 +29,11 @@ def get_employee_display_name(employee):
     salutation = safe_strip(getattr(employee, 'Salutation', ''))
     first_name = safe_strip(getattr(employee, 'employee_first_name', ''))
     last_name = safe_strip(getattr(employee, 'employee_last_name', ''))
-
+    print(salutation,first_name,last_name);
     name_parts = [salutation, first_name, last_name]
     name = ' '.join(part for part in name_parts if part)
-
+    print("**********before***EMP****");
+    print(name);
     # Fallback: return just first_name or last_name if both others are missing
     if not name:
         name = first_name or last_name or ''
@@ -339,10 +340,12 @@ def team_member_counts(request):
 
 def build_org_chart(employee):
     
-    employee_name = f"{employee.Salutation} {employee.employee_first_name} {employee.employee_last_name}"
+    employee_name = get_employee_display_name(employee)
+    print("**********after***EMP****");
+    print(employee_name);
     return {
         "id": employee.employee_user_id,
-        "name": get_employee_display_name(employee),
+        "name": employee_name,
         "label":employee.designation,
         "department": employee.departmant,
         "profileimg": employee.employee_photo.url if employee.employee_photo else "/media/default-profile.png",
