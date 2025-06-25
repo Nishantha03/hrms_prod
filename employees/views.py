@@ -35,12 +35,17 @@ class EventView(APIView):
                 dob_month=ExtractMonth('date_of_birth')
             ).filter(dob_day=today.day, dob_month=today.month)
             for employee in birthdays:
+                full_name = " ".join(filter(None, [
+                    employee.Salutation,
+                    employee.employee_first_name,
+                    employee.employee_last_name
+                ]))
                 Event.objects.update_or_create(
                     employee=employee,
                     event_type="Birthday",
                     event_date=today,
                     defaults={
-                        "employee_name": f"{employee.Salutation} {employee.employee_first_name} {employee.employee_last_name}",
+                        "employee_name": full_name,
                         "employee_photo": employee.employee_photo,
                     },
                 )
@@ -51,12 +56,17 @@ class EventView(APIView):
                 doj_month=ExtractMonth('date_of_joining')
             ).filter(doj_day=today.day, doj_month=today.month)
             for employee in work_anniversaries:
+                full_name = " ".join(filter(None, [
+                    employee.Salutation,
+                    employee.employee_first_name,
+                    employee.employee_last_name
+                ]))
                 Event.objects.update_or_create(
                     employee=employee,
                     event_type="Work Anniversary",
                     event_date=today,
                     defaults={
-                        "employee_name": f"{employee.Salutation} {employee.employee_first_name} {employee.employee_last_name}",
+                        "employee_name": full_name,
                         "employee_photo": employee.employee_photo,
                     },
                 )
@@ -170,9 +180,14 @@ def get_subordinates(manager):
     
 
     for emp in subordinates:
+        full_name = " ".join(filter(None, [
+                    emp.Salutation,
+                    emp.employee_first_name,
+                    emp.employee_last_name
+                ]))
         result.append({
             "id": emp.employee_user_id,
-            "name": f"{emp.Salutation} {emp.employee_first_name} {emp.employee_last_name}",
+            "name": full_name,
             "department": emp.departmant,
             "designation": emp.designation,
             "email": emp.email,
@@ -197,11 +212,15 @@ def get_team_details(request):
         user = request.user
         print(user)
         manager = Employee.objects.get(user=user, is_active = True) 
-
+        full_name = " ".join(filter(None, [
+                    manager.Salutation,
+                    manager.employee_first_name,
+                    manager.employee_last_name
+                ]))
        
         team_members = [{
             "id": manager.employee_user_id,
-            "name": f"{manager.Salutation} {manager.employee_first_name} {manager.employee_last_name}",
+            "name": full_name,
             "email": manager.email,
             "designation": manager.designation,
             "department": manager.departmant,
@@ -315,9 +334,14 @@ def team_member_counts(request):
         )
 
 def build_org_chart(employee):
+    full_name = " ".join(filter(None, [
+                    employee.Salutation,
+                    employee.employee_first_name,
+                    employee.employee_last_name
+                ]))
     return {
         "id": employee.employee_user_id,
-        "name": f"{employee.Salutation} {employee.employee_first_name} {employee.employee_last_name}",
+        "name": full_name,
         "label":employee.designation,
         "department": employee.departmant,
         "profileimg": employee.employee_photo.url if employee.employee_photo else "/media/default-profile.png",
