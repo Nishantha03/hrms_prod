@@ -23,7 +23,7 @@ import pandas as pd
 import math
 
 def is_valid(val):
-    return val is not None and val != '' and not pd.isna(val)
+    return val is not None and val != '' and not pd.isna(val) and str(val).strip().lower() != 'not available'
 
 def get_employee_display_name(employee):
     name_parts = []
@@ -33,13 +33,13 @@ def get_employee_display_name(employee):
     last_name = getattr(employee, 'employee_last_name', '').strip()
 
     if is_valid(salutation):
-        name_parts.append(salutation)
+        name_parts.append(salutation.strip())
     if is_valid(first_name):
-        name_parts.append(first_name)
+        name_parts.append(first_name.strip())
     if is_valid(last_name):
-        name_parts.append(last_name)
+        name_parts.append(last_name.strip())
 
-    return ' '.join(name_parts)
+    return ' '.join(name_parts).strip()
 
 class EventView(APIView):
     """
@@ -56,7 +56,7 @@ class EventView(APIView):
             ).filter(dob_day=today.day, dob_month=today.month)
             for employee in birthdays:
                 employee_name = f"{employee.Salutation} {employee.employee_first_name} {employee.employee_last_name}"
-
+                
                 Event.objects.update_or_create(
                     employee=employee,
                     event_type="Birthday",
@@ -339,6 +339,7 @@ def team_member_counts(request):
         )
 
 def build_org_chart(employee):
+    
     employee_name = f"{employee.Salutation} {employee.employee_first_name} {employee.employee_last_name}"
     return {
         "id": employee.employee_user_id,
