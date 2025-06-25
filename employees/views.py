@@ -29,12 +29,12 @@ def is_nan(val):
 def clean_field(val):
     if val is None or is_nan(val):
         return ''
-    if isinstance(val, str):
-        val = val.strip()
-        if val.lower().startswith('not available'):
-            val = val.replace('Not Available', '', 1).strip()
-        return val
-    return str(val).strip()
+    val = str(val).strip()
+    if val.lower().startswith('not available'):
+        val = val.replace('Not Available', '').strip()
+    if val.lower() == 'nan':
+        return ''
+    return val
 
 def get_employee_display_name(employee):
     salutation = clean_field(getattr(employee, 'Salutation', ''))
