@@ -12,13 +12,13 @@ from base.models import UserRequest
 class UserRegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
     # role = serializers.CharField(write_only=True)
+    username = serializers.CharField(required=True, validators=[])
 
     class Meta:
         model = User
         fields = ['username', 'email', 'password']
     
-    def validate_username(self, value):
-        return value
+    
     
     def create(self, validated_data):
         # role = validated_data.pop('role', 'user')
