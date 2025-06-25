@@ -22,17 +22,24 @@ import pandas as pd
 
 import math
 
-def safe_value(val):
-    # Handles None, '', and NaN values
-    return val if val and not (isinstance(val, float) and math.isnan(val)) else ''
+def is_valid(val):
+    return val is not None and val != '' and not pd.isna(val)
 
 def get_employee_display_name(employee):
-    parts = filter(None, [
-        safe_value(getattr(employee, 'Salutation', '')).strip(),
-        safe_value(getattr(employee, 'employee_first_name', '')).strip(),
-        safe_value(getattr(employee, 'employee_last_name', '')).strip(),
-    ])
-    return ' '.join(parts).strip() or "Not Available"
+    name_parts = []
+
+    salutation = getattr(employee, 'Salutation', '').strip()
+    first_name = getattr(employee, 'employee_first_name', '').strip()
+    last_name = getattr(employee, 'employee_last_name', '').strip()
+
+    if is_valid(salutation):
+        name_parts.append(salutation)
+    if is_valid(first_name):
+        name_parts.append(first_name)
+    if is_valid(last_name):
+        name_parts.append(last_name)
+
+    return ' '.join(name_parts)
 
 class EventView(APIView):
     """
