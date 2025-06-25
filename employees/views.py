@@ -40,7 +40,7 @@ class EventView(APIView):
                     event_type="Birthday",
                     event_date=today,
                     defaults={
-                        "employee_name": f"{employee.employee_first_name} {employee.employee_last_name}",
+                        "employee_name": f"{employee.Salutation} {employee.employee_first_name} {employee.employee_last_name}",
                         "employee_photo": employee.employee_photo,
                     },
                 )
@@ -56,7 +56,7 @@ class EventView(APIView):
                     event_type="Work Anniversary",
                     event_date=today,
                     defaults={
-                        "employee_name": f"{employee.employee_first_name} {employee.employee_last_name}",
+                        "employee_name": f"{employee.Salutation} {employee.employee_first_name} {employee.employee_last_name}",
                         "employee_photo": employee.employee_photo,
                     },
                 )
@@ -172,7 +172,7 @@ def get_subordinates(manager):
     for emp in subordinates:
         result.append({
             "id": emp.employee_user_id,
-            "name": f"{emp.employee_first_name} {emp.employee_last_name}",
+            "name": f"{emp.Salutation} {emp.employee_first_name} {emp.employee_last_name}",
             "department": emp.departmant,
             "designation": emp.designation,
             "email": emp.email,
@@ -201,7 +201,7 @@ def get_team_details(request):
        
         team_members = [{
             "id": manager.employee_user_id,
-            "name": f"{manager.employee_first_name} {manager.employee_last_name}",
+            "name": f"{manager.Salutation} {manager.employee_first_name} {manager.employee_last_name}",
             "email": manager.email,
             "designation": manager.designation,
             "department": manager.departmant,
