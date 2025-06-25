@@ -22,27 +22,29 @@ import pandas as pd
 
 import math
 
-def get_employee_display_name(employee):
-    def safe_strip(val):
-        if isinstance(val, str):
-            val = val.strip()
-            if val.lower().startswith('not available'):
-                val = val.replace('Not Available', '', 1).strip()
-        return val if val else ''
-    
-    salutation = safe_strip(getattr(employee, 'Salutation', ''))
-    first_name = safe_strip(getattr(employee, 'employee_first_name', ''))
-    last_name = safe_strip(getattr(employee, 'employee_last_name', ''))
-    print(salutation,first_name,last_name);
-    name_parts = [salutation, first_name, last_name]
-    name = ' '.join(part for part in name_parts if part)
-    print("**********before***EMP****");
-    print(name);
-    # Fallback: return just first_name or last_name if both others are missing
-    if not name:
-        name = first_name or last_name or ''
 
-    return name.strip()
+def is_nan(val):
+    return isinstance(val, float) and math.isnan(val)
+
+def clean_field(val):
+    if val is None or is_nan(val):
+        return ''
+    if isinstance(val, str):
+        val = val.strip()
+        if val.lower().startswith('not available'):
+            val = val.replace('Not Available', '', 1).strip()
+        return val
+    return str(val).strip()
+
+def get_employee_display_name(employee):
+    salutation = clean_field(getattr(employee, 'Salutation', ''))
+    first_name = clean_field(getattr(employee, 'employee_first_name', ''))
+    last_name = clean_field(getattr(employee, 'employee_last_name', ''))
+
+    name_parts = [salutation, first_name, last_name]
+    name = ' '.join(part for part in name_parts if part).strip()
+
+    return name
 
 
 class EventView(APIView):
@@ -66,7 +68,7 @@ class EventView(APIView):
                     event_type="Birthday",
                     event_date=today,
                     defaults={
-                        "employee_name": get_employee_display_name(employee_name),
+                        "employee_name": get_employee_display_name(employee),
                         "employee_photo": employee.employee_photo,
                     },
                 )
@@ -83,7 +85,7 @@ class EventView(APIView):
                     event_type="Work Anniversary",
                     event_date=today,
                     defaults={
-                        "employee_name": get_employee_display_name(employee_name),
+                        "employee_name": get_employee_display_name(employee),
                         "employee_photo": employee.employee_photo,
                     },
                 )
@@ -197,10 +199,9 @@ def get_subordinates(manager):
     
 
     for emp in subordinates:
-        employee_name = f"{emp.Salutation} {emp.employee_first_name} {emp.employee_last_name}"
         result.append({
             "id": emp.employee_user_id,
-            "name": get_employee_display_name(employee_name),
+            "name": get_employee_display_name(emp),
             "department": emp.departmant,
             "designation": emp.designation,
             "email": emp.email,
@@ -225,11 +226,10 @@ def get_team_details(request):
         user = request.user
         print(user)
         manager = Employee.objects.get(user=user, is_active = True) 
-        employee_name = f"{manager.Salutation} {manager.employee_first_name} {manager.employee_last_name}"
        
         team_members = [{
             "id": manager.employee_user_id,
-            "name": get_employee_display_name(employee_name),
+            "name": get_employee_display_name(manager),
             "email": manager.email,
             "designation": manager.designation,
             "department": manager.departmant,
