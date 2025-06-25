@@ -24,7 +24,11 @@ import math
 
 def get_employee_display_name(employee):
     def safe_strip(val):
-        return val.strip() if isinstance(val, str) else ''
+        if isinstance(val, str):
+            val = val.strip()
+            if val.lower().startswith('not available'):
+                val = val.replace('Not Available', '', 1).strip()
+        return val if val else ''
     
     salutation = safe_strip(getattr(employee, 'Salutation', ''))
     first_name = safe_strip(getattr(employee, 'employee_first_name', ''))
