@@ -149,6 +149,7 @@ class AnnouncementListView(APIView):
             # if not hasattr(user, 'employee'):
             #     return Response({'error': 'User does not have an associated department'}, status=status.HTTP_400_BAD_REQUEST)
             user_name = user.username
+            print(user_name)
             parts = user_name.strip().split()
 
             if len(parts) >= 3:
