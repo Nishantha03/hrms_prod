@@ -152,6 +152,7 @@ class AnnouncementListView(APIView):
             announcement = serializer.save(created_by=user, department=user.employee.department)  
 
             user_details = user.employee
+            print(user_details)
             employee_name = f"{user_details.employee_first_name} {user_details.employee_last_name}"
 
             announcement.user_name = employee_name
