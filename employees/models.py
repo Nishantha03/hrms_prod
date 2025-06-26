@@ -105,7 +105,8 @@ class Employee(models.Model):
         """
         Override save method to generate an avatar if no photo is provided.
         """
-        if not self.employee_photo:
+        if not self.employee_photo or not self.employee_photo.name:
+            print(f"Generating avatar for: {self.employee_first_name} {self.employee_last_name}")
             avatar = generate_avatar(self.employee_first_name, self.employee_last_name)
             self.employee_photo.save(f"{self.employee_first_name}_avatar.png", avatar, save=False)
         
