@@ -146,8 +146,8 @@ class AnnouncementListView(APIView):
             user = request.user
             print("Announcement")
             print(user)
-            if not hasattr(user, 'employee'):
-                return Response({'error': 'User does not have an associated department'}, status=status.HTTP_400_BAD_REQUEST)
+            # if not hasattr(user, 'employee'):
+            #     return Response({'error': 'User does not have an associated department'}, status=status.HTTP_400_BAD_REQUEST)
 
             announcement = serializer.save(created_by=user, department=user.employee.department)  
 
