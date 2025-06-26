@@ -34,6 +34,8 @@ def clean_field(val):
         val = val.replace('Not Available', '').strip()
     if val.lower() == 'nan':
         return ''
+    if val.lower() == 'None':
+        return ''
     return val
 
 def get_employee_display_name(employee):
