@@ -135,8 +135,10 @@ class EmployeeViewSet(APIView):
         serializer = EmployeeSerializer(data=request.data)
         # print(request.data)
         data = request.data
+        print(data)
         user_name = data['user']
         user_ = User.objects.get(username=user_name)
+        print(user_)
         data['user'] = user_.id
         if serializer.is_valid():
             serializer.save()
