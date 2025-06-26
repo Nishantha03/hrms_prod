@@ -151,38 +151,32 @@ class AnnouncementListView(APIView):
             user_name = user.username
             print(user_name)
             parts = user_name.strip().split()
+             # handles last names with spaces
 
-            if len(parts) >= 3:
-                salutation = parts[0]
-                first_name = parts[1]
-                last_name = " ".join(parts[2:])  # handles last names with spaces
+            employee = Employee.objects.filter(
+                employee_first_name=user_name,
+            ).first()
+            print(employee)
+            announcement = serializer.save(created_by=user, department=employee.departmant)  
 
-                employee = Employee.objects.filter(
-                    Salutation=salutation,
-                    employee_first_name=first_name,
-                    employee_last_name=last_name
-                ).first()
-                print(employee)
-                announcement = serializer.save(created_by=user, department=employee.departmant)  
+            
+            employee_name = f"{employee.Salutation} {employee.employee_first_name} {employee.employee_last_name}"
 
-                
-                employee_name = f"{employee.Salutation} {employee.employee_first_name} {employee.employee_last_name}"
+            announcement.user_name = employee_name
+            if employee.employee_photo:
+                user_image_url = employee.employee_photo.url  
+                if user_image_url.startswith('/media/'):
+                    user_image_url = user_image_url[7:]  
+                announcement.user_image = user_image_url
+            else:
+                announcement.user_image = None
 
-                announcement.user_name = employee_name
-                if employee.employee_photo:
-                    user_image_url = employee.employee_photo.url  
-                    if user_image_url.startswith('/media/'):
-                        user_image_url = user_image_url[7:]  
-                    announcement.user_image = user_image_url
-                else:
-                    announcement.user_image = None
+            announcement.save()  
 
-                announcement.save()  
-
-                response_data = serializer.data
-                response_data['user_name'] = employee_name
-                response_data['user_image'] = user_image_url if employee.employee_photo else None
-                return Response(response_data, status=status.HTTP_201_CREATED)
+            response_data = serializer.data
+            response_data['user_name'] = employee_name
+            response_data['user_image'] = user_image_url if employee.employee_photo else None
+            return Response(response_data, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
