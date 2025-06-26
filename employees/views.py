@@ -81,7 +81,6 @@ class EventView(APIView):
                 doj_month=ExtractMonth('date_of_joining')
             ).filter(doj_day=today.day, doj_month=today.month)
             for employee in work_anniversaries:
-                employee_name = f"{employee.Salutation} {employee.employee_first_name} {employee.employee_last_name}"
                 Event.objects.update_or_create(
                     employee=employee,
                     event_type="Work Anniversary",

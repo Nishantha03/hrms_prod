@@ -148,16 +148,26 @@ class AnnouncementListView(APIView):
             print(user)
             # if not hasattr(user, 'employee'):
             #     return Response({'error': 'User does not have an associated department'}, status=status.HTTP_400_BAD_REQUEST)
+            parts = user.strip().split()
 
-            announcement = serializer.save(created_by=user, department=user.employee.department)  
+            if len(parts) >= 3:
+                salutation = parts[0]
+                first_name = parts[1]
+                last_name = " ".join(parts[2:])  # handles last names with spaces
 
-            user_details = user.employee
-            print(user_details)
-            employee_name = f"{user_details.employee_first_name} {user_details.employee_last_name}"
+                employee = Employee.objects.filter(
+                    Salutation=salutation,
+                    employee_first_name=first_name,
+                    employee_last_name=last_name
+                ).first()
+            announcement = serializer.save(created_by=user, department=employee.department)  
+
+            
+            employee_name = f"{employee.Salutation} {employee.employee_first_name} {employee.employee_last_name}"
 
             announcement.user_name = employee_name
-            if user_details.employee_photo:
-                user_image_url = user_details.employee_photo.url  
+            if employee.employee_photo:
+                user_image_url = employee.employee_photo.url  
                 if user_image_url.startswith('/media/'):
                     user_image_url = user_image_url[7:]  
                 announcement.user_image = user_image_url
@@ -168,7 +178,7 @@ class AnnouncementListView(APIView):
 
             response_data = serializer.data
             response_data['user_name'] = employee_name
-            response_data['user_image'] = user_image_url if user_details.employee_photo else None
+            response_data['user_image'] = user_image_url if employee.employee_photo else None
             return Response(response_data, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
