@@ -118,7 +118,7 @@ class EmployeeViewSet(APIView):
         if pk:
             try:
                 employee = Employee.objects.get(user_id=pk, is_active=True)
-                print(employee)
+                # print(employee)
                 serializer = EmployeeSerializer(employee)
                 return Response(serializer.data, status=status.HTTP_200_OK)
             except Employee.DoesNotExist:
@@ -131,7 +131,7 @@ class EmployeeViewSet(APIView):
         
     def post(self, request):
         serializer = EmployeeSerializer(data=request.data)
-        print(request.data)
+        # print(request.data)
         data = request.data
         user_name = data['user']
         user_ = User.objects.get(username=user_name)
@@ -139,7 +139,7 @@ class EmployeeViewSet(APIView):
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        print(serializer.errors)
+        # print(serializer.errors)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     def put(self, request, pk):
@@ -224,7 +224,7 @@ def get_team_details(request):
     
     try:
         user = request.user
-        print(user)
+        # print(user)
         manager = Employee.objects.get(user=user, is_active = True) 
        
         team_members = [{
@@ -345,8 +345,8 @@ def team_member_counts(request):
 def build_org_chart(employee):
     
     employee_name = get_employee_display_name(employee)
-    print("**********after***EMP****");
-    print(employee_name);
+    # print("**********after***EMP****");
+    # print(employee_name);
     return {
         "id": employee.employee_user_id,
         "name": employee_name,
@@ -391,9 +391,9 @@ def get_employee_by_id(request, pk):
     Get employee details by id.
     """
     try:
-        print(pk)
+        # print(pk)
         employee = get_object_or_404(Employee, user__id=pk)
-        print(employee)
+        # print(employee)
         serializer = EmployeeSerializer(employee)
         return Response(serializer.data, status=status.HTTP_200_OK)
     except Employee.DoesNotExist:
@@ -425,7 +425,7 @@ class UploadEmployeeExcelView(APIView):
             for index, row in df.iterrows():
                 username = row.get("username")
                 password = row.get("password")
-                print(username, password)
+                # print(username, password)
                 if not username or not password:
                     continue  # Skip if no username/password
 
@@ -476,18 +476,18 @@ class UploadEmployeeExcelView(APIView):
                 designation = str(row.get("designation", ""))
                 department = str(row.get("departmant", ""))
                 username = str(row.get("username", ""))
-                print(designation,department,username)
+                # print(designation,department,username)
                 try:
                     user = User.objects.get(username=username)
-                    print(user)
+                    # print(user)
                     employee = Employee.objects.get(user=user)
-                    print(employee)
+                    # print(employee)
                     if designation == "HOD"or designation == "Professor & HoD":
                         manager_username = principal_user
                     else:
                         manager_username = hod_lookup.get(department)
-                    print(hod_lookup)
-                    print(manager_username)
+                    # print(hod_lookup)
+                    # print(manager_username)
                     if manager_username:
                         try:
                             manager_user = User.objects.get(username=manager_username)

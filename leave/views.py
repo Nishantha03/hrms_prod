@@ -152,7 +152,20 @@ class LeaveViewSet(viewsets.ModelViewSet):
                 "error": "Leave cannot be applied on Holidays.",
             }, status=status.HTTP_400_BAD_REQUEST)
         try:
-            employee = Employee.objects.get(employee_first_name=data['user_name'])
+            user_name = data['user_name']  # e.g., "Ms. Saranya V"
+            parts = user_name.strip().split()
+
+            if len(parts) >= 3:
+                salutation = parts[0]
+                first_name = parts[1]
+                last_name = " ".join(parts[2:])  # handles last names with spaces
+
+                employee = Employee.objects.filter(
+                    Salutation=salutation,
+                    employee_first_name=first_name,
+                    employee_last_name=last_name
+                ).first()
+            # employee = Employee.objects.get(employee_first_name=data['user_name'])
         except Employee.DoesNotExist:
             return Response({
                 "error": "Employee not found."
