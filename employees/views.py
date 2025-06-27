@@ -416,7 +416,7 @@ class UploadEmployeeExcelView(APIView):
         # file_path = r"C:\Santhiya\QPT\hrms_Updated_ april 07\backend\employees\emp_data_upload.xlsx"
         if not file_path:
             return Response({"error": "No file uploaded."}, status=status.HTTP_400_BAD_REQUEST)
-
+        skipped_rows = []
         try:
 
             if file_path.name.endswith('.csv'):
@@ -433,6 +433,7 @@ class UploadEmployeeExcelView(APIView):
                     continue  # Skip if no username/password
 
                 # Create or update user
+               
                 try:
                     user, created = User.objects.get_or_create(username=username)
                     user.email = row.get("email")
@@ -469,7 +470,7 @@ class UploadEmployeeExcelView(APIView):
                 department = str(row.get("departmant", ""))
                 username = str(row.get("username", ""))
 
-                if designation == "HOD"or designation == "Professor & HoD":
+                if designation == "HOD"or designation == "Professor & HoD" or designation == "Associate Professor & HOD" or designation == "Dean":
                     hod_lookup[department] = username
                 elif designation == "Principal":
                     principal_user = username
@@ -485,7 +486,7 @@ class UploadEmployeeExcelView(APIView):
                     print(user)
                     employee = Employee.objects.get(user=user)
                     print(employee)
-                    if designation == "HOD"or designation == "Professor & HoD":
+                    if designation == "HOD"or designation == "Professor & HoD" or designation == "Associate Professor & HOD" or designation == "Dean":
                         manager_username = principal_user
                     else:
                         manager_username = hod_lookup.get(department)
@@ -506,6 +507,8 @@ class UploadEmployeeExcelView(APIView):
             return Response({"message": "Employees and login details uploaded successfully"}, status=status.HTTP_201_CREATED)
 
         except Exception as e:
+            print(f"❌ Error processing row {index + 2}: {e}")
+            skipped_rows.append(index + 2)
             import traceback
             return Response({
                 "error": str(e),
