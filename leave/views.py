@@ -155,17 +155,20 @@ class LeaveViewSet(viewsets.ModelViewSet):
             user_name = data['user_name']  # e.g., "Ms. Saranya V"
             parts = user_name.strip().split()
 
-            if len(parts) >= 3:
-                salutation = parts[0]
-                first_name = parts[1]
-                last_name = " ".join(parts[2:])  # handles last names with spaces
+            salutation = parts[0] if len(parts) >= 3 else ''
+            first_name = parts[0] if len(parts) == 1 else parts[1] if len(parts) >= 2 else ''
+            last_name = parts[1] if len(parts) == 2 else " ".join(parts[2:]) if len(parts) >= 3 else ''
 
-                employee = Employee.objects.filter(
-                    Salutation=salutation,
-                    employee_first_name=first_name,
-                    employee_last_name=last_name
-                ).first()
-                print("Employee Leave", employee);
+            filters = {}
+            if salutation:
+                filters['Salutation__iexact'] = salutation
+            if first_name:
+                filters['employee_first_name__iexact'] = first_name
+            if last_name:
+                filters['employee_last_name__iexact'] = last_name
+
+            employee = Employee.objects.filter(**filters).first()
+            print("Employee Leave", employee);
             # employee = Employee.objects.get(employee_first_name=data['user_name'])
         except Employee.DoesNotExist:
             return Response({
