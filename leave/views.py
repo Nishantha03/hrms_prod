@@ -152,12 +152,22 @@ class LeaveViewSet(viewsets.ModelViewSet):
                 "error": "Leave cannot be applied on Holidays.",
             }, status=status.HTTP_400_BAD_REQUEST)
         try:
-            user_name = data['user_name']  # e.g., "Ms. Saranya V"
-            parts = user_name.strip().split()
+            user_name = data.get('user_name', '').strip()
+            parts = user_name.split()
 
-            salutation = parts[0] if len(parts) >= 3 else ''
-            first_name = parts[0] if len(parts) == 1 else parts[1] if len(parts) >= 2 else ''
-            last_name = parts[1] if len(parts) == 2 else " ".join(parts[2:]) if len(parts) >= 3 else ''
+            # Correct logic
+            if len(parts) == 1:
+                salutation = ''
+                first_name = parts[0]
+                last_name = ''
+            elif len(parts) == 2:
+                salutation = ''
+                first_name = parts[0]
+                last_name = parts[1]
+            else:  # len(parts) >= 3
+                salutation = parts[0]
+                first_name = parts[1]
+                last_name = " ".join(parts[2:])
 
             filters = {}
             if salutation:
