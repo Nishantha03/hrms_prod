@@ -165,6 +165,7 @@ class LeaveViewSet(viewsets.ModelViewSet):
                     employee_first_name=first_name,
                     employee_last_name=last_name
                 ).first()
+                print("Employee Leave", employee);
             # employee = Employee.objects.get(employee_first_name=data['user_name'])
         except Employee.DoesNotExist:
             return Response({
