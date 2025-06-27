@@ -435,13 +435,16 @@ class UploadEmployeeExcelView(APIView):
                 # Create or update user
                 try:
                     user, created = User.objects.get_or_create(username=username)
-                    user.email = row.get("email")
                     if created:
-                        user.set_password(password)  # Set password only when creating
-                    user.is_active = True
-                    user.save()
+                        user.email = row.get("email")
+                        user.set_password(password)
+                        user.is_active = True
+                        user.save()
+                    else:
+                        print(f"User '{username}' already exists, skipping password update.")
                 except IntegrityError:
-                    continue  # Skip duplicate or problematic users
+                    print(f"Skipping duplicate or invalid user: {username}")
+                    continue
 
                 # Create or update employee
                 Employee.objects.update_or_create(
