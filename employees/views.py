@@ -412,86 +412,103 @@ class UploadEmployeeExcelView(APIView):
 
     def post(self, request):
         file_path = request.FILES.get("file")
-        # print(file_path)
-        # file_path = r"C:\Santhiya\QPT\hrms_Updated_ april 07\backend\employees\emp_data_upload.xlsx"
         if not file_path:
             return Response({"error": "No file uploaded."}, status=status.HTTP_400_BAD_REQUEST)
-        skipped_rows = []
-        try:
 
+        skipped_rows = []
+
+        try:
             if file_path.name.endswith('.csv'):
                 df = pd.read_csv(file_path)
             else:
                 df = pd.read_excel(file_path)
-            # print(df)
+
             df.columns = df.columns.str.strip()
+
             for index, row in df.iterrows():
-                username = row.get("username")
-                password = row.get("password")
-                print(username, password)
-                if not username or not password:
-                    continue  # Skip if no username/password
-
-                # Create or update user
-               
                 try:
-                    user, created = User.objects.get_or_create(username=username)
-                    user.email = row.get("email")
-                    if created:
-                        user.set_password(password)  # Set password only when creating
-                    user.is_active = True
-                    user.save()
-                except IntegrityError:
-                    continue  # Skip duplicate or problematic users
+                    username = row.get("username")
+                    password = row.get("password")
+                    print(username, password)
 
-                # Create or update employee
-                Employee.objects.update_or_create(
-                    user=user,
-                    defaults={
-                        "employee_user_id": row.get("employee_user_id"),
-                        "Salutation": row.get("Salutation"),
-                        "employee_first_name": row.get("employee_first_name"),
-                        "employee_last_name": row.get("employee_last_name"),
-                        "email": row.get("email"),
-                        "contact_number": row.get("contact_number"),
-                        "date_of_birth": row.get("date_of_birth"),
-                        "date_of_joining": row.get("date_of_joining"),
-                        "gender": row.get("gender"),
-                        "designation": row.get("designation"),
-                        "departmant": row.get("departmant"),
-                    },
-                )
-            
-            hod_lookup = {}
-            principal_user = None
+                    if not username or not password:
+                        skipped_rows.append(index + 2)
+                        continue
+
+                    # Create or update user
+                    try:
+                        user, created = User.objects.get_or_create(username=username)
+                        user.email = row.get("email")
+                        if created:
+                            user.set_password(password)
+                        user.is_active = True
+                        user.save()
+                    except IntegrityError:
+                        skipped_rows.append(index + 2)
+                        continue
+
+                    # Create or update employee
+                    try:
+                        Employee.objects.update_or_create(
+                            user=user,
+                            defaults={
+                                "employee_user_id": row.get("employee_user_id"),
+                                "Salutation": row.get("Salutation"),
+                                "employee_first_name": row.get("employee_first_name"),
+                                "employee_last_name": row.get("employee_last_name"),
+                                "email": row.get("email"),
+                                "contact_number": row.get("contact_number"),
+                                "date_of_birth": row.get("date_of_birth"),
+                                "date_of_joining": row.get("date_of_joining"),
+                                "gender": row.get("gender"),
+                                "designation": row.get("designation"),
+                                "departmant": row.get("departmant"),
+                            },
+                        )
+                    except Exception as e:
+                        print(f"Error creating employee on row {index + 2}: {e}")
+                        skipped_rows.append(index + 2)
+                        continue
+
+                except Exception as e:
+                    print(f"Unexpected error on row {index + 2}: {e}")
+                    skipped_rows.append(index + 2)
+                    continue
+
+            # HOD and Principal logic
+            self.hod_lookup = {}
+            self.principal_user = None
 
             for _, row in df.iterrows():
                 designation = str(row.get("designation", ""))
                 department = str(row.get("departmant", ""))
                 username = str(row.get("username", ""))
 
-                if designation == "HOD"or designation == "Professor & HoD" or designation == "Associate Professor & HOD" or designation == "Dean":
-                    hod_lookup[department] = username
+                if designation in ["HOD", "Professor & HoD", "Associate Professor & HOD", "Dean"]:
+                    self.hod_lookup[department] = username
                 elif designation == "Principal":
-                    principal_user = username
+                    self.principal_user = username
 
-            # Step 3: Assign reporting managers
             for _, row in df.iterrows():
                 designation = str(row.get("designation", ""))
                 department = str(row.get("departmant", ""))
                 username = str(row.get("username", ""))
-                print(designation,department,username)
+                print(designation, department, username)
+
                 try:
                     user = User.objects.get(username=username)
                     print(user)
                     employee = Employee.objects.get(user=user)
                     print(employee)
-                    if designation == "HOD"or designation == "Professor & HoD" or designation == "Associate Professor & HOD" or designation == "Dean":
-                        manager_username = principal_user
+
+                    if designation in ["HOD", "Professor & HoD", "Associate Professor & HOD", "Dean"]:
+                        manager_username = self.principal_user
                     else:
-                        manager_username = hod_lookup.get(department)
-                    print(hod_lookup)
+                        manager_username = self.hod_lookup.get(department)
+
+                    print(self.hod_lookup)
                     print(manager_username)
+
                     if manager_username:
                         try:
                             manager_user = User.objects.get(username=manager_username)
@@ -504,14 +521,17 @@ class UploadEmployeeExcelView(APIView):
                 except (User.DoesNotExist, Employee.DoesNotExist):
                     continue
 
-            return Response({"message": "Employees and login details uploaded successfully"}, status=status.HTTP_201_CREATED)
+            message = "Employees and login details uploaded successfully"
+            if skipped_rows:
+                message += f". Skipped rows: {skipped_rows}"
+
+            return Response({"message": message}, status=status.HTTP_201_CREATED)
 
         except Exception as e:
-            print(f"❌ Error processing row {index + 2}: {e}")
-            skipped_rows.append(index + 2)
             import traceback
             return Response({
                 "error": str(e),
                 "trace": traceback.format_exc()
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
