@@ -417,8 +417,6 @@ class UploadEmployeeExcelView(APIView):
         if not file_path:
             return Response({"error": "No file uploaded."}, status=status.HTTP_400_BAD_REQUEST)
 
-        skipped_rows = [] 
-
         try:
 
             if file_path.name.endswith('.csv'):
@@ -430,48 +428,38 @@ class UploadEmployeeExcelView(APIView):
             for index, row in df.iterrows():
                 username = row.get("username")
                 password = row.get("password")
-                # print(username, password)
+                print(username, password)
                 if not username or not password:
                     continue  # Skip if no username/password
 
                 # Create or update user
                 try:
                     user, created = User.objects.get_or_create(username=username)
+                    user.email = row.get("email")
                     if created:
-                        user.email = row.get("email")
-                        user.set_password(password)
-                        
-                    else:
-                        if User.objects.filter(email=row.get("email")).exclude(username=username).exists():
-                            print(f"User '{username}' already exists, skipping password update.")
-                            continue
-                        user.email = row.get("email")
+                        user.set_password(password)  # Set password only when creating
                     user.is_active = True
                     user.save()
                 except IntegrityError:
-                    print(f"Skipping duplicate or invalid user: {username}")
-                    continue
+                    continue  # Skip duplicate or problematic users
 
-                try:
-                    Employee.objects.update_or_create(
-                        user=user,
-                        defaults={
-                            "employee_user_id": row.get("employee_user_id"),
-                            "Salutation": row.get("Salutation"),
-                            "employee_first_name": row.get("employee_first_name"),
-                            "employee_last_name": row.get("employee_last_name"),
-                            "email": row.get("email"),
-                            "contact_number": row.get("contact_number"),
-                            "date_of_birth": row.get("date_of_birth"),
-                            "date_of_joining": row.get("date_of_joining"),
-                            "gender": row.get("gender"),
-                            "designation": row.get("designation"),
-                            "departmant": row.get("departmant"),
-                        },
-                    )
-                except Exception:
-                    skipped_rows.append(index + 2)
-                    continue
+                # Create or update employee
+                Employee.objects.update_or_create(
+                    user=user,
+                    defaults={
+                        "employee_user_id": row.get("employee_user_id"),
+                        "Salutation": row.get("Salutation"),
+                        "employee_first_name": row.get("employee_first_name"),
+                        "employee_last_name": row.get("employee_last_name"),
+                        "email": row.get("email"),
+                        "contact_number": row.get("contact_number"),
+                        "date_of_birth": row.get("date_of_birth"),
+                        "date_of_joining": row.get("date_of_joining"),
+                        "gender": row.get("gender"),
+                        "designation": row.get("designation"),
+                        "departmant": row.get("departmant"),
+                    },
+                )
             
             hod_lookup = {}
             principal_user = None
@@ -481,7 +469,7 @@ class UploadEmployeeExcelView(APIView):
                 department = str(row.get("departmant", ""))
                 username = str(row.get("username", ""))
 
-                if designation == "HOD" or designation == "Professor & HoD" or designation == "Associate Professor & HOD" or designation == "Dean":
+                if designation == "HOD"or designation == "Professor & HoD":
                     hod_lookup[department] = username
                 elif designation == "Principal":
                     principal_user = username
@@ -491,18 +479,18 @@ class UploadEmployeeExcelView(APIView):
                 designation = str(row.get("designation", ""))
                 department = str(row.get("departmant", ""))
                 username = str(row.get("username", ""))
-                # print(designation,department,username)
+                print(designation,department,username)
                 try:
                     user = User.objects.get(username=username)
-                    # print(user)
+                    print(user)
                     employee = Employee.objects.get(user=user)
-                    # print(employee)
-                    if designation == "HOD" or designation == "Professor & HoD" or designation == "Associate Professor & HOD" or designation == "Dean":
+                    print(employee)
+                    if designation == "HOD"or designation == "Professor & HoD":
                         manager_username = principal_user
                     else:
                         manager_username = hod_lookup.get(department)
-                    # print(hod_lookup)
-                    # print(manager_username)
+                    print(hod_lookup)
+                    print(manager_username)
                     if manager_username:
                         try:
                             manager_user = User.objects.get(username=manager_username)
@@ -518,7 +506,6 @@ class UploadEmployeeExcelView(APIView):
             return Response({"message": "Employees and login details uploaded successfully"}, status=status.HTTP_201_CREATED)
 
         except Exception as e:
-            
             import traceback
             return Response({
                 "error": str(e),
