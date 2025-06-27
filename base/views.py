@@ -33,7 +33,7 @@ def get_username(request, pk=None):
     user_department = userdetails.departmant
     username = user.username
     name = f"{userdetails.Salutation} {userdetails.employee_first_name} {userdetails.employee_last_name}"
-    return Response({'username': username, 'department': user_department, 'name': name})
+    return Response({'username': username, 'department': user_department, 'name': name, 'first_name': userdetails.employee_first_name})
 
 
 @api_view(['POST'])
