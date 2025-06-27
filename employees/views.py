@@ -475,7 +475,7 @@ class UploadEmployeeExcelView(APIView):
                 department = str(row.get("departmant", ""))
                 username = str(row.get("username", ""))
 
-                if designation in ["HOD", "Professor & HoD", "Associate Professor & HOD", "Dean"]:
+                if designation == "HOD"or designation == "Professor & HoD" or designation == "Associate Professor & HOD" or designation == "Dean":
                     hod_lookup[department] = username
                 elif designation == "Principal":
                     principal_user = username
@@ -490,7 +490,8 @@ class UploadEmployeeExcelView(APIView):
                     user = User.objects.get(username=username)
                     employee = Employee.objects.get(user=user)
 
-                    if designation in ["HOD", "Professor & HoD", "Associate Professor & HOD", "Dean"]:
+                    if designation == "HOD"or designation == "Professor & HoD" or designation == "Associate Professor & HOD" or designation == "Dean":
+
                         manager_username = principal_user
                     else:
                         manager_username = hod_lookup.get(department)
