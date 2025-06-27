@@ -438,10 +438,14 @@ class UploadEmployeeExcelView(APIView):
                     if created:
                         user.email = row.get("email")
                         user.set_password(password)
-                        user.is_active = True
-                        user.save()
+                        
                     else:
-                        print(f"User '{username}' already exists, skipping password update.")
+                        if User.objects.filter(email=row.get("email")).exclude(username=username).exists():
+                            print(f"User '{username}' already exists, skipping password update.")
+                            continue
+                        user.email = row.get("email")
+                    user.is_active = True
+                    user.save()
                 except IntegrityError:
                     print(f"Skipping duplicate or invalid user: {username}")
                     continue
@@ -509,6 +513,8 @@ class UploadEmployeeExcelView(APIView):
             return Response({"message": "Employees and login details uploaded successfully"}, status=status.HTTP_201_CREATED)
 
         except Exception as e:
+            excel_row_number = index + 2
+            print(f"❌ Error at Excel row {excel_row_number}: {e}")
             import traceback
             return Response({
                 "error": str(e),
