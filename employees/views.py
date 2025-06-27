@@ -63,7 +63,6 @@ class EventView(APIView):
                 dob_month=ExtractMonth('date_of_birth')
             ).filter(dob_day=today.day, dob_month=today.month)
             for employee in birthdays:
-                employee_name = f"{employee.Salutation} {employee.employee_first_name} {employee.employee_last_name}"
                 
                 Event.objects.update_or_create(
                     employee=employee,
