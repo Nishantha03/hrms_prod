@@ -154,7 +154,7 @@ class LeaveViewSet(viewsets.ModelViewSet):
             }, status=status.HTTP_400_BAD_REQUEST)
         try:
             user_name = data.get('user_name', '').strip()
-
+            print(user_name);
             if not user_name:
                 return Response({"error": "User name is required."}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -162,7 +162,7 @@ class LeaveViewSet(viewsets.ModelViewSet):
 
             # Split into parts
             parts = user_name.split()
-
+            print(parts);
             # Supported salutations
             salutations = ['Mr.', 'Mrs.', 'Ms.', 'Dr.']
 

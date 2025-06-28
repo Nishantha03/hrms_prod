@@ -48,8 +48,8 @@ class PermissionRequestViewSet(viewsets.ModelViewSet):
         data['time_from'] = start_time.strftime("%H:%M")
         data['time_to'] = end_time.strftime("%H:%M")    
         
-        user_name = data['user_name']  # e.g., "Ms. Saranya V"
-        parts = user_name.strip().split()
+        # user_name = data['user_name']  # e.g., "Ms. Saranya V"
+        # parts = user_name.strip().split()
 
         try:
             user_name = data.get('user_name', '').strip()
