@@ -92,16 +92,26 @@ def get_payslips(request):
     records = Payslip.objects.all()
 
     if year and month:
-        year_suffix = year[-2:]
-        combined = f"{month}-{year_suffix}"
-        records = records.filter(month__iexact=combined)
-    
-    elif year and not month:
-        year_suffix = year[-2:]
-        records = records.filter(month__iendswith=year_suffix)
+        try:
+            year = int(year)
+            month = int(month)
+            records = records.filter(month__year=year, month__month=month)
+        except ValueError:
+            return Response({"error": "Year and month must be numbers."}, status=400)
 
-    elif month and not year:
-        records = records.filter(month__istartswith=month)
+    elif year:
+        try:
+            year = int(year)
+            records = records.filter(month__year=year)
+        except ValueError:
+            return Response({"error": "Year must be a number."}, status=400)
+
+    elif month:
+        try:
+            month = int(month)
+            records = records.filter(month__month=month)
+        except ValueError:
+            return Response({"error": "Month must be a number."}, status=400)
 
     return Response(list(records.values()), status=200)
 
