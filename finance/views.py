@@ -85,12 +85,6 @@ def upload_payslip_file(request):
 def get_payslips(request):
     """
     POST: Filters payslips by year and/or month from JSON body.
-    Expected payload:
-    {
-        "year": "2025",
-        "month": "Apr"
-    }
-    Response: Array of payslip objects.
     """
     year = request.data.get('year')
     month = request.data.get('month')
@@ -98,12 +92,15 @@ def get_payslips(request):
     records = Payslip.objects.all()
 
     if year and month:
-        # Format: Apr-25
-        month_year = f"{month}-{str(year)[-2:]}"
-        records = records.filter(month__iexact=month_year)
-    elif year:
-        records = records.filter(month__iendswith=str(year)[-2:])
-    elif month:
+        year_suffix = year[-2:]
+        combined = f"{month}-{year_suffix}"
+        records = records.filter(month__iexact=combined)
+    
+    elif year and not month:
+        year_suffix = year[-2:]
+        records = records.filter(month__iendswith=year_suffix)
+
+    elif month and not year:
         records = records.filter(month__istartswith=month)
 
     return Response(list(records.values()), status=200)

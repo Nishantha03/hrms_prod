@@ -5,6 +5,7 @@ urlpatterns = [
     path('upload-payslip/', upload_payslip_file, name='upload_payslip'),
     path('payslips/', get_payslips, name='get_payslips'),
     path('fetch_salary/', fetch_payslip_by_employee, name='fetch_payslip_by_employee'),
-    path('salary_card/', get_latest_card_details, name='get_latest_card_details')
+    path('salary_card/', get_latest_card_details, name='get_latest_card_details'),
+    path('get_payslips/',get_payslips, name = 'get_payslips_by_year')
 
 ]
