@@ -14,6 +14,7 @@ from datetime import datetime, timedelta, date
 import json
 from django.db.models import Q
 from dateutil.relativedelta import relativedelta
+import re
 
 
 class LeavesViewSet(viewsets.ModelViewSet):
@@ -153,21 +154,35 @@ class LeaveViewSet(viewsets.ModelViewSet):
             }, status=status.HTTP_400_BAD_REQUEST)
         try:
             user_name = data.get('user_name', '').strip()
+
+            if not user_name:
+                return Response({"error": "User name is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Normalize names like "Dr.Saranya" → "Dr. Saranya"
+            user_name = re.sub(r'^(Mr|Mrs|Ms|Dr)\.?(?=\w)', r'\1. ', user_name)
+
+            # Split into parts
             parts = user_name.split()
 
-            # Correct logic
-            if len(parts) == 1:
-                salutation = ''
-                first_name = parts[0]
-                last_name = ''
-            elif len(parts) == 2:
-                salutation = ''
-                first_name = parts[0]
-                last_name = parts[1]
-            else:  # len(parts) >= 3
+            # Supported salutations
+            salutations = ['Mr.', 'Mrs.', 'Ms.', 'Dr.']
+
+            # Extract components
+            salutation = ''
+            first_name = ''
+            last_name = ''
+
+            if parts and parts[0] in salutations:
                 salutation = parts[0]
-                first_name = parts[1]
-                last_name = " ".join(parts[2:])
+                if len(parts) >= 2:
+                    first_name = parts[1]
+                if len(parts) >= 3:
+                    last_name = " ".join(parts[2:])
+            else:
+                if len(parts) >= 1:
+                    first_name = parts[0]
+                if len(parts) >= 2:
+                    last_name = " ".join(parts[1:])
 
             filters = {}
             if salutation:
@@ -179,7 +194,6 @@ class LeaveViewSet(viewsets.ModelViewSet):
 
             employee = Employee.objects.filter(**filters).first()
             print("Employee Leave", employee);
-            # employee = Employee.objects.get(employee_first_name=data['user_name'])
         except Employee.DoesNotExist:
             return Response({
                 "error": "Employee not found."

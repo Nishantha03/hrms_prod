@@ -5,6 +5,7 @@ from .models import Permission, Employee
 from permissions.serializers import PermissionSerializer
 from rest_framework.decorators import action
 from datetime import datetime, time, timedelta, date
+import re
 
 
 class PermissionRequestViewSet(viewsets.ModelViewSet):
@@ -50,16 +51,50 @@ class PermissionRequestViewSet(viewsets.ModelViewSet):
         user_name = data['user_name']  # e.g., "Ms. Saranya V"
         parts = user_name.strip().split()
 
-        if len(parts) >= 3:
-            salutation = parts[0]
-            first_name = parts[1]
-            last_name = " ".join(parts[2:])  # handles last names with spaces
+        try:
+            user_name = data.get('user_name', '').strip()
 
-            employee = Employee.objects.filter(
-                Salutation=salutation,
-                employee_first_name=first_name,
-                employee_last_name=last_name
-            ).first()
+            if not user_name:
+                return Response({"error": "User name is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Normalize names like "Dr.Saranya" → "Dr. Saranya"
+            user_name = re.sub(r'^(Mr|Mrs|Ms|Dr)\.?(?=\w)', r'\1. ', user_name)
+
+            # Split into parts
+            parts = user_name.split()
+
+            # Supported salutations
+            salutations = ['Mr.', 'Mrs.', 'Ms.', 'Dr.']
+
+            # Extract components
+            salutation = ''
+            first_name = ''
+            last_name = ''
+
+            if parts and parts[0] in salutations:
+                salutation = parts[0]
+                if len(parts) >= 2:
+                    first_name = parts[1]
+                if len(parts) >= 3:
+                    last_name = " ".join(parts[2:])
+            else:
+                if len(parts) >= 1:
+                    first_name = parts[0]
+                if len(parts) >= 2:
+                    last_name = " ".join(parts[1:])
+
+            filters = {}
+            if salutation:
+                filters['Salutation__iexact'] = salutation
+            if first_name:
+                filters['employee_first_name__iexact'] = first_name
+            if last_name:
+                filters['employee_last_name__iexact'] = last_name
+
+            employee = Employee.objects.filter(**filters).first()
+            print("Employee Leave", employee);
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         employee_id = employee.employee_id
         data['employee'] = employee_id
         print(data)
