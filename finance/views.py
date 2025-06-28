@@ -14,6 +14,8 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.core.files.storage import default_storage
 from finance.models import Payslip  
+import calendar
+
 
 @csrf_exempt
 def upload_payslip_file(request):
@@ -91,27 +93,37 @@ def get_payslips(request):
 
     records = Payslip.objects.all()
 
-    if year and month:
+    def convert_month_to_number(month_str):
+        if not month_str:
+            return None
+        month_str = month_str.strip().lower()
+        for i in range(1, 13):
+            if (calendar.month_name[i].lower() == month_str or
+                calendar.month_abbr[i].lower() == month_str):
+                return i
+        return None
+
+    # Try to convert month to number
+    month_number = convert_month_to_number(month) if month else None
+
+    if year and month_number:
         try:
-            year = int(year)
-            month = int(month)
-            records = records.filter(month__year=year, month__month=month)
+            records = records.filter(month__year=year, month__month=month_number)
         except ValueError:
-            return Response({"error": "Year and month must be numbers."}, status=400)
+            return Response({"error": "Invalid year or month format."}, status=400)
 
     elif year:
         try:
             year = int(year)
             records = records.filter(month__year=year)
         except ValueError:
-            return Response({"error": "Year must be a number."}, status=400)
+            return Response({"error": "Invalid year format."}, status=400)
 
-    elif month:
+    elif month_number:
         try:
-            month = int(month)
-            records = records.filter(month__month=month)
+            records = records.filter(month__month=month_number)
         except ValueError:
-            return Response({"error": "Month must be a number."}, status=400)
+            return Response({"error": "Invalid month format."}, status=400)
 
     return Response(list(records.values()), status=200)
 
