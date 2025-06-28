@@ -158,8 +158,7 @@ class LeaveViewSet(viewsets.ModelViewSet):
             if not user_name:
                 return Response({"error": "User name is required."}, status=status.HTTP_400_BAD_REQUEST)
 
-            # Normalize names like "Dr.Saranya" → "Dr. Saranya"
-            user_name = re.sub(r'^(Mr|Mrs|Ms|Dr)\.?(?=\w)', r'\1. ', user_name)
+            user_name = re.sub(r'^(Mr|Mrs|Ms|Dr)[.]?([A-Z])', r'\1. \2', user_name)
 
             # Split into parts
             parts = user_name.split()
