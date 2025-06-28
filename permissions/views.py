@@ -58,30 +58,29 @@ class PermissionRequestViewSet(viewsets.ModelViewSet):
                 return Response({"error": "User name is required."}, status=status.HTTP_400_BAD_REQUEST)
 
             # Normalize names like "Dr.Saranya" → "Dr. Saranya"
-            user_name = re.sub(r'^(Mr|Mrs|Ms|Dr)[.]?([A-Z])', r'\1. \2', user_name)
-
-            # Split into parts
+            user_name = re.sub(r'^(mr|mrs|ms|dr)[.]?(\w)', lambda m: m.group(1).capitalize() + '. ' + m.group(2), user_name, flags=re.IGNORECASE)
+            print(user_name);
             parts = user_name.split()
             print(parts);
-            # Supported salutations
-            salutations = ['Mr.', 'Mrs.', 'Ms.', 'Dr.']
-
-            # Extract components
+            # Normalized valid salutations
+            valid_salutations = ['Mr.', 'Mrs.', 'Ms.', 'Dr.']
             salutation = ''
             first_name = ''
             last_name = ''
 
-            if parts and parts[0] in salutations:
-                salutation = parts[0]
-                if len(parts) >= 2:
-                    first_name = parts[1]
-                if len(parts) >= 3:
-                    last_name = " ".join(parts[2:])
+            # Check if first part is a normalized salutation
+            if parts and parts[0].capitalize() + '.' in valid_salutations:
+                salutation = parts[0].capitalize() + '.'
+                first_name = parts[1] if len(parts) >= 2 else ''
+                last_name = " ".join(parts[2:]) if len(parts) >= 3 else ''
             else:
-                if len(parts) >= 1:
-                    first_name = parts[0]
-                if len(parts) >= 2:
-                    last_name = " ".join(parts[1:])
+                first_name = parts[0] if len(parts) >= 1 else ''
+                last_name = " ".join(parts[1:]) if len(parts) >= 2 else ''
+
+            # Strip and clean up
+            salutation = salutation.strip().replace('..', '.')
+            first_name = first_name.strip()
+            last_name = last_name.strip().rstrip('.')
 
             filters = {}
             if salutation:
