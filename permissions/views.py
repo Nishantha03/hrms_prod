@@ -58,7 +58,7 @@ class PermissionRequestViewSet(viewsets.ModelViewSet):
                 return Response({"error": "User name is required."}, status=status.HTTP_400_BAD_REQUEST)
 
             # Normalize names like "Dr.Saranya" → "Dr. Saranya"
-            user_name = re.sub(r'^(Mr|Mrs|Ms|Dr)[.]?([A-Z])', r'\1. \2', user_name, flags=re.IGNORECASE)
+            user_name = re.sub(r'^(Mr|Mrs|Ms|Dr)[.]?([A-Z])', r'\1. \2', user_name)
             print(user_name);
             parts = user_name.split()
             print(parts);
@@ -70,8 +70,8 @@ class PermissionRequestViewSet(viewsets.ModelViewSet):
             valid_salutations = ['Mr.', 'Mrs.', 'Ms.', 'Dr.']
 
             # Extract salutation only if it's valid
-            if parts and (parts[0] + '.').capitalize() in valid_salutations:
-                salutation = (parts[0] + '.').capitalize()
+            if parts and (parts[0] if parts[0].endswith('.') else parts[0] + '.') in valid_salutations:
+                salutation = parts[0] if parts[0].endswith('.') else parts[0] + '.'
                 first_name = parts[1] if len(parts) >= 2 else ''
                 last_name = " ".join(parts[2:]) if len(parts) >= 3 else ''
             else:
