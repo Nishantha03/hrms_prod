@@ -62,7 +62,7 @@ class PermissionRequestViewSet(viewsets.ModelViewSet):
 
             # Split into parts
             parts = user_name.split()
-
+            print(parts);
             # Supported salutations
             salutations = ['Mr.', 'Mrs.', 'Ms.', 'Dr.']
 
