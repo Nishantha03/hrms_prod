@@ -81,17 +81,32 @@ def upload_payslip_file(request):
     return JsonResponse({'error': 'No file uploaded'}, status=400)
 
 
-@api_view(['GET'])
+@api_view(['POST'])
 def get_payslips(request):
-    """Fetches payslip details for a given year (optional)"""
-    year = request.GET.get('year')
+    """
+    POST: Filters payslips by year and/or month from JSON body.
+    Expected payload:
+    {
+        "year": "2025",
+        "month": "Apr"
+    }
+    Response: Array of payslip objects.
+    """
+    year = request.data.get('year')
+    month = request.data.get('month')
 
-    if year:
-        records = Payslip.objects.filter(month__icontains=year).values()
-    else:
-        records = Payslip.objects.all().values()
+    records = Payslip.objects.all()
 
-    return Response({"data": list(records)}, status=200)
+    if year and month:
+        # Format: Apr-25
+        month_year = f"{month}-{str(year)[-2:]}"
+        records = records.filter(month__iexact=month_year)
+    elif year:
+        records = records.filter(month__iendswith=str(year)[-2:])
+    elif month:
+        records = records.filter(month__istartswith=month)
+
+    return Response(list(records.values()), status=200)
 
 
 @api_view(['GET'])
