@@ -78,9 +78,9 @@ MIDDLEWARE = [
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
-    "https://65.108.80.127:3000",
-    "https://65.108.80.127:8000",
-    "https://65.108.80.127"
+    "http://65.108.80.127:3000",
+    "http://65.108.80.127:8000",
+    "http://65.108.80.127"
 ]
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
@@ -140,7 +140,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'backend.wsgi.application'
 # FRONTEND_URL = "http://localhost:5173"
 
-FRONTEND_URL = "https://65.108.80.127:8000"
+FRONTEND_URL = "http://65.108.80.127:8000"
 
 
 # Database
