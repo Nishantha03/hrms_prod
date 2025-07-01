@@ -82,7 +82,8 @@ CORS_ALLOWED_ORIGINS = [
     "https://65.108.80.127:8000",
     "https://65.108.80.127",
     "https://srieshwarems.com",
-    "https://backoffice.srieshwarems.com"
+    "https://backoffice.srieshwarems.com",
+    "http://65.108.80.127:8000"
 ]
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
